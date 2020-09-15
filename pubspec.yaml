@@ -28,6 +28,8 @@ dependencies:
   flutter_masked_text: ^0.8.0
   flutter_launcher_icons: ^0.7.5
   flutter_dotenv: ^2.1.0
+  flutter_statusbarcolor: ^0.2.3
+  smooth_page_indicator: ^0.2.0
   http: ^0.12.2
   flutter:
     sdk: flutter
@@ -56,6 +58,7 @@ flutter:
     - assets/photos/BackgroundImage.png
     - assets/icons/canada_icon.png
     - assets/icons/dolar_icon.png
+    - assets/icons/payment_icon.png
     - .env
 
   fonts:

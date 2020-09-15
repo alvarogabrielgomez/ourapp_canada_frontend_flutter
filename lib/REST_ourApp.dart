@@ -17,7 +17,6 @@ Future<List<Purchase>> fetchPurchases() async {
     var data =
         (responseValues as List).map((p) => Purchase.fromJson(p)).toList();
     var test = purchaseToJson(data[0]);
-    print(test);
 
     return data;
   } else {
@@ -30,7 +29,6 @@ Future<List<TypePurchase>> fetchTypePurchases() async {
   if (response.statusCode == 200) {
     var responseJson = json.decode(response.body);
     var responseValues = responseJson["value"];
-    print(responseValues);
     var data =
         (responseValues as List).map((p) => TypePurchase.fromJson(p)).toList();
     return data;
@@ -48,7 +46,6 @@ Future<RestResponse> newPurchase(Purchase purchase) async {
       print("Posted new Purchase");
       var restResponse = restResponseFromJson(httppost.body);
       restResponse.statuscode = httppost.statusCode;
-      print(restResponseToJson(restResponse));
       return restResponse;
     } else {
       throw Exception('Falla al guardar purchase');

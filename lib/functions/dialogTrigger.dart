@@ -19,6 +19,26 @@ class DialogMessages {
       ),
     );
   }
+
+  Future<T> openDialogYesOrNo<T>(
+      {BuildContext context,
+      String title,
+      String message,
+      String okLabel,
+      String noLabel,
+      TypeMessages typeMessage = TypeMessages.MESSAGEOKCANCEL}) {
+    return slideDialog.showSlideDialog(
+      maxHeight: 300,
+      context: context,
+      child: SlidingUpPanelMessages(
+        messageTitle: title,
+        message: message,
+        type: typeMessage,
+        okLabel: okLabel,
+        cancelLabel: noLabel,
+      ),
+    );
+  }
 }
 
 class PanelOption {

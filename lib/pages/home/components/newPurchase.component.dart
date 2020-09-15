@@ -45,76 +45,90 @@ class _NewPurchasePanelState extends State<NewPurchasePanel> {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        Container(
-          child: PageView(
-            onPageChanged: (page) {
-              setState(() {
-                _selectedIndex = page;
-              });
-            },
-            physics: NeverScrollableScrollPhysics(),
-            controller: pageViewController,
-            children: [
-              page1(moneyMaskControllerPurchase),
-              page2(),
-              page3(descriptionController),
-              pageSubmit(),
-            ],
+    return WillPopScope(
+      onWillPop: () => _validateIfHaveData(context),
+      child: Stack(
+        children: [
+          Container(
+            child: PageView(
+              onPageChanged: (page) {
+                setState(() {
+                  _selectedIndex = page;
+                });
+              },
+              physics: NeverScrollableScrollPhysics(),
+              controller: pageViewController,
+              children: [
+                page1(moneyMaskControllerPurchase),
+                page2(),
+                page3(descriptionController),
+                pageSubmit(),
+              ],
+            ),
           ),
-        ),
-        Align(
-            alignment: Alignment.bottomCenter,
-            child: Padding(
-              padding: const EdgeInsets.only(bottom: 20.0, left: 20, right: 20),
-              child: Container(
-                height: 60,
-                child: Stack(
-                  children: [
-                    _selectedIndex == 2
-                        ? Align(
-                            alignment: Alignment.centerRight,
-                            child: FloatingActionButton(
-                              onPressed: () {
-                                focusNodeValuePurchase.unfocus();
-                                _submitPage();
-                              },
-                              tooltip: 'Submit',
-                              child: Icon(Icons.check),
-                            ),
-                          )
-                        : _selectedIndex < 2
-                            ? Align(
-                                alignment: Alignment.centerRight,
-                                child: FloatingActionButton(
-                                  onPressed: () {
-                                    focusNodeValuePurchase.unfocus();
-                                    _nextPage();
-                                  },
-                                  tooltip: 'Next',
-                                  child: Icon(Icons.arrow_forward),
-                                ),
-                              )
-                            : Container(),
-                    _selectedIndex > 0 && _selectedIndex < 3
-                        ? Align(
-                            alignment: Alignment.centerLeft,
-                            child: FloatingActionButton(
-                              onPressed: () {
-                                _backPage();
-                              },
-                              tooltip: 'Back',
-                              child: Icon(Icons.arrow_back),
-                            ),
-                          )
-                        : Container(),
-                  ],
+          Align(
+              alignment: Alignment.bottomCenter,
+              child: Padding(
+                padding:
+                    const EdgeInsets.only(bottom: 20.0, left: 20, right: 20),
+                child: Container(
+                  height: 60,
+                  child: Stack(
+                    children: [
+                      _selectedIndex == 2
+                          ? Align(
+                              alignment: Alignment.centerRight,
+                              child: FloatingActionButton(
+                                onPressed: () {
+                                  focusNodeValuePurchase.unfocus();
+                                  _submitPage();
+                                },
+                                tooltip: 'Submit',
+                                child: Icon(Icons.check),
+                              ),
+                            )
+                          : _selectedIndex < 2
+                              ? Align(
+                                  alignment: Alignment.centerRight,
+                                  child: FloatingActionButton(
+                                    onPressed: () {
+                                      focusNodeValuePurchase.unfocus();
+                                      _nextPage();
+                                    },
+                                    tooltip: 'Next',
+                                    child: Icon(Icons.arrow_forward),
+                                  ),
+                                )
+                              : Container(),
+                      _selectedIndex > 0 && _selectedIndex < 3
+                          ? Align(
+                              alignment: Alignment.centerLeft,
+                              child: FloatingActionButton(
+                                onPressed: () {
+                                  _backPage();
+                                },
+                                tooltip: 'Back',
+                                child: Icon(Icons.arrow_back),
+                              ),
+                            )
+                          : Container(),
+                    ],
+                  ),
                 ),
-              ),
-            )),
-      ],
+              )),
+        ],
+      ),
     );
+  }
+
+  Future<bool> _validateIfHaveData(BuildContext context) async {
+    print("Validating if have data");
+    if (moneyMaskControllerPurchase.text != "0,00") {
+      print("Have data on it");
+      return Future.value(false);
+    } else {
+      return Future.value(true);
+    }
   }
 
   _onTypePurchaseSelected(bool selected, type) {
@@ -128,6 +142,32 @@ class _NewPurchasePanelState extends State<NewPurchasePanel> {
       });
     }
     print(purchase.types);
+  }
+
+  _onTypePurchaseSelectedRadio(type) {
+    setState(() {
+      purchase.types = [];
+      purchase.types.add(type);
+    });
+    print(purchase.types);
+  }
+
+  listTypeOfPurchaseRadio() {
+    return ListView.builder(
+      itemCount: _typesOfPurchases.length,
+      physics: BouncingScrollPhysics(),
+      itemBuilder: (BuildContext context, int index) {
+        return RadioListTile(
+          title: Text(_typesOfPurchases[index].name),
+          value: _typesOfPurchases[index].name,
+          onChanged: (selected) {
+            _onTypePurchaseSelectedRadio(selected);
+          },
+          groupValue: purchase.types.length > 0 ? purchase.types[0] ?? 0 : 0,
+          selected: false,
+        );
+      },
+    );
   }
 
   listTypeOfPurchase() {
@@ -311,7 +351,7 @@ class _NewPurchasePanelState extends State<NewPurchasePanel> {
             height: 0,
           ),
           Expanded(
-            child: listTypeOfPurchase(),
+            child: listTypeOfPurchaseRadio(),
           )
         ],
       ),

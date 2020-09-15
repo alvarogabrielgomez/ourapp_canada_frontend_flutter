@@ -28,6 +28,7 @@ class RawTile extends StatelessWidget {
         child: Container(
           width: width,
           height: height,
+          constraints: BoxConstraints(maxHeight: height),
           child: child,
         ),
         onTap: onTap,
