@@ -12,16 +12,18 @@ class RawTile extends StatelessWidget {
       : super(key: key);
   @override
   Widget build(BuildContext context) {
-    Color _splashColor = darken(color, 0.2).withAlpha(50);
-    Color _highlightColor = darken(color, 0.2).withAlpha(75);
+    var backgroundColor = color != null ? color : lightBtnBackground;
+    Color _splashColor = darken(backgroundColor, 0.2).withAlpha(50);
+    Color _highlightColor = darken(backgroundColor, 0.2).withAlpha(75);
     return Material(
       clipBehavior: Clip.antiAlias,
       elevation: 0,
-      color: color != null ? color : Colors.transparent,
+      color: backgroundColor,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(25.0),
       ),
       child: InkWell(
+        splashFactory: InkRipple.splashFactory,
         splashColor: _splashColor,
         focusColor: Colors.transparent,
         highlightColor: _highlightColor,

@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 
 final Color redCanada = Color(0xFFd52b1e);
 final Color redCanadaDark = Color(0xFF8A1B14);
+final Color redCanadaDark2 = Color(0xFFBA261D);
 final Color backgroundColor = Colors.white;
 final Color textColor = Colors.black87;
 final Color textSecondaryColor = Colors.black38;
+final Color lightBtnBackground = Color(0xFFefefef);
 
 Color darken(Color color, [double amount = .1]) {
   assert(amount >= 0 && amount <= 1);

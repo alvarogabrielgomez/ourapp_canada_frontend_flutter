@@ -4,7 +4,7 @@ import 'package:ourapp_canada/customPlugins/slide_popup_dialog-0.0.2/slide_popup
 import 'package:ourapp_canada/widgets/SlidingUpPanelMessages/sliding-up-panel-messages.widget.dart';
 
 class DialogMessages {
-  Future<T> openDialogMessage<T>(
+  static Future<T> openDialogMessage<T>(
       {BuildContext context,
       String title,
       String message,
@@ -20,15 +20,16 @@ class DialogMessages {
     );
   }
 
-  Future<T> openDialogYesOrNo<T>(
+  static Future<T> openDialogYesOrNo<T>(
       {BuildContext context,
       String title,
       String message,
       String okLabel,
       String noLabel,
+      double maxHeight,
       TypeMessages typeMessage = TypeMessages.MESSAGEOKCANCEL}) {
     return slideDialog.showSlideDialog(
-      maxHeight: 300,
+      maxHeight: maxHeight,
       context: context,
       child: SlidingUpPanelMessages(
         messageTitle: title,

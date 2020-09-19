@@ -30,6 +30,7 @@ dependencies:
   flutter_dotenv: ^2.1.0
   flutter_statusbarcolor: ^0.2.3
   smooth_page_indicator: ^0.2.0
+  intl: ^0.15.7
   http: ^0.12.2
   flutter:
     sdk: flutter
@@ -59,6 +60,7 @@ flutter:
     - assets/icons/canada_icon.png
     - assets/icons/dolar_icon.png
     - assets/icons/payment_icon.png
+    - assets/graphics/charts_background.png
     - .env
 
   fonts:

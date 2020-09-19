@@ -15,17 +15,16 @@ class PurchaseDetailsPage extends StatefulWidget {
 class _PurchaseDetailsPageState extends State<PurchaseDetailsPage> {
   @override
   Widget build(BuildContext context) {
-    changeStatusBar();
     return Hero(
       tag: widget.purchase.id,
       child: Scaffold(
         appBar: AppBar(
+          brightness: Brightness.light,
+          backgroundColor: lightBtnBackground,
+          title: Text(widget.purchase.description,
+              style: TextStyle(color: redCanada)),
+          iconTheme: IconThemeData(color: redCanada),
           centerTitle: true,
-          backgroundColor: Colors.white,
-          leading: leadingBtn(() {
-            Navigator.pop(context);
-          }),
-          title: title(widget.purchase.description),
         ),
         body: Text("TEST"),
       ),

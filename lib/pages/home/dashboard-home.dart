@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_statusbarcolor/flutter_statusbarcolor.dart';
-import 'package:ourapp_canada/REST_ourApp.dart';
 import 'package:ourapp_canada/models/Purchase.dart';
 import 'package:ourapp_canada/pages/PurchaseDetails/purchase-details-page.dart';
-import 'package:ourapp_canada/pages/cuentasFijas/cuentasFijas.dart';
+import 'package:ourapp_canada/pages/cuentasFijas/cuentas-fijas-page.dart';
 import 'package:ourapp_canada/pages/home/components/list-tile-purchaase-dashboard.component.dart';
 import 'package:ourapp_canada/pages/home/components/newPurchase.component.dart';
 import 'package:ourapp_canada/functions/dialogTrigger.dart';
@@ -23,8 +21,8 @@ class _DashboardState extends State<Dashboard> {
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
       new GlobalKey<RefreshIndicatorState>();
   bool busyListWidget = true;
-  bool errorMessage = false;
-  Future<List<Purchase>> _getPurchases = fetchPurchases();
+  bool errorShow = false;
+  String errorMessage = "";
   List<Purchase> _listOfPurchases;
   int _selectedIndex = 0;
   final pageViewController = new PageController(initialPage: 0);
@@ -38,48 +36,54 @@ class _DashboardState extends State<Dashboard> {
   Widget build(BuildContext context) {
     changeStatusBar();
     return Scaffold(
-      body: Stack(
-        children: [
-          backgroundDashboard(),
-          RefreshIndicator(
-            key: _refreshIndicatorKey,
-            displacement: 50,
-            onRefresh: reload,
-            child: ListView(
-              // padding: EdgeInsets.symmetric(horizontal: 27),
-              physics: BouncingScrollPhysics(),
-              children: [
-                header(),
-                SizedBox(height: 35),
-                mainTileCompras(),
-                SizedBox(height: 35),
-                Center(
-                  child: Text(
-                    "Historial de Compras",
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontFamily: 'Lato',
-                        fontWeight: FontWeight.bold),
+      body: AnnotatedRegion<SystemUiOverlayStyle>(
+        value: SystemUiOverlayStyle.light,
+        child: Stack(
+          children: [
+            backgroundDashboard(),
+            RefreshIndicator(
+              key: _refreshIndicatorKey,
+              displacement: 50,
+              onRefresh: reload,
+              child: ListView(
+                // padding: EdgeInsets.symmetric(horizontal: 27),
+                physics: BouncingScrollPhysics(),
+                children: [
+                  header(),
+                  SizedBox(height: 35),
+                  mainTileCompras(),
+                  SizedBox(height: 35),
+                  Center(
+                    child: Text(
+                      "Historial del mes",
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontFamily: 'Lato',
+                          fontWeight: FontWeight.bold),
+                    ),
                   ),
-                ),
-                busyListWidget
-                    ? Center(
-                        child: Padding(
-                          padding: const EdgeInsets.only(top: 35),
-                          child: CircularProgressIndicator(
-                            valueColor:
-                                new AlwaysStoppedAnimation<Color>(Colors.white),
+                  SizedBox(height: 35),
+                  busyListWidget
+                      ? Center(
+                          child: Padding(
+                            padding: const EdgeInsets.only(top: 35),
+                            child: CircularProgressIndicator(
+                              valueColor: new AlwaysStoppedAnimation<Color>(
+                                  Colors.white),
+                            ),
                           ),
-                        ),
-                      )
-                    : !errorMessage
-                        ? listPurchases(_listOfPurchases)
-                        : ErrorRetrieveInfo(),
-                SizedBox(height: 35),
-              ],
+                        )
+                      : !errorShow
+                          ? listPurchases(_listOfPurchases)
+                          : ErrorRetrieveInfo(
+                              error: errorMessage,
+                            ),
+                  SizedBox(height: 35),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -98,16 +102,19 @@ class _DashboardState extends State<Dashboard> {
       busyListWidget = true;
       print("Loading loadPurchases...");
     });
-    return fetchPurchases().then((response) {
+    return new Purchase().getAllCurrentMonth().then((response) {
       setState(() {
         _listOfPurchases = response;
         busyListWidget = false;
         print("Loaded loadPurchases...");
       });
     }).catchError((onError) {
+      print(onError);
+
       setState(() {
         busyListWidget = false;
-        errorMessage = true;
+        errorShow = true;
+        errorMessage = "Error LoadPurchases";
         print("Error loadPurchases...");
       });
     });
@@ -117,7 +124,7 @@ class _DashboardState extends State<Dashboard> {
     setState(() {
       print("Loading reloadPurchases...");
     });
-    return fetchPurchases().then((response) {
+    return new Purchase().getAllCurrentMonth().then((response) {
       setState(() {
         _listOfPurchases = response;
         print("Loaded reloadPurchases...");
@@ -125,7 +132,8 @@ class _DashboardState extends State<Dashboard> {
     }).catchError((onError) {
       setState(() {
         busyListWidget = false;
-        errorMessage = true;
+        errorShow = true;
+        errorMessage = "Error ReloadPurchases";
         print("Error reloadPurchases...");
       });
     });
@@ -172,7 +180,7 @@ class _DashboardState extends State<Dashboard> {
     return Column(
       children: [
         SizedBox(
-          height: 50,
+          height: 20,
         ),
         Container(
           alignment: Alignment.center,
@@ -181,13 +189,13 @@ class _DashboardState extends State<Dashboard> {
           child: Hero(
             tag: 'logo',
             child: Container(
-              width: 165,
+              width: 60,
               child: Image.asset('assets/icons/canada_icon.png'),
             ),
           ),
         ),
         SizedBox(
-          height: 9,
+          height: 5,
         ),
         Container(
           alignment: Alignment.center,
@@ -322,7 +330,7 @@ class _DashboardState extends State<Dashboard> {
             Navigator.push(
               context,
               DashboardPageRoute(
-                  builder: (context) => CuentasFijas(heroTag: heroTag)),
+                  builder: (context) => CuentasFijasWidget(heroTag: heroTag)),
             );
           },
           width: MediaQuery.of(context).size.width,

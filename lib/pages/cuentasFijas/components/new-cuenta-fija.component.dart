@@ -1,44 +1,48 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_masked_text/flutter_masked_text.dart';
 import 'package:ourapp_canada/colors.dart';
-import 'package:ourapp_canada/models/Purchase.dart';
-import 'package:ourapp_canada/models/TypePurchase.model.dart';
+import 'package:ourapp_canada/models/CuentasFijas.dart';
 import 'package:ourapp_canada/functions/dialogTrigger.dart';
 import 'package:ourapp_canada/widgets/SlidingUpPanelMessages/sliding-up-panel-messages.widget.dart';
 
-class NewPurchasePanel extends StatefulWidget {
+class NewCuentaFijaPanel extends StatefulWidget {
   @override
-  _NewPurchasePanelState createState() => _NewPurchasePanelState();
+  _NewCuentaFijaPanelState createState() => _NewCuentaFijaPanelState();
 }
 
-class _NewPurchasePanelState extends State<NewPurchasePanel> {
+class _NewCuentaFijaPanelState extends State<NewCuentaFijaPanel> {
   DialogMessages dialogMessages;
 
-  Purchase purchase = Purchase.newObject();
+  CuentaFija cuentaFija = CuentaFija.newObject();
   bool busy = false;
-
-  List<TypePurchase> _typesOfPurchases = getTypesOfPurchases();
 
   int _selectedIndex = 0;
   int _maxPage = 3;
   String formattedLocaleMoney;
-  FocusNode focusNodeValuePurchase;
+  FocusNode focusNodeValueCuentaFija;
+  FocusNode focusNodeName;
   FocusNode focusNodeDescription;
-  var moneyMaskControllerPurchase = new MoneyMaskedTextController(
+
+  var moneyMaskControllerCuentaFija = new MoneyMaskedTextController(
       decimalSeparator: ',', thousandSeparator: '.');
+  var nameController = new TextEditingController();
   var descriptionController = new TextEditingController();
   final pageViewController = new PageController(initialPage: 0);
 
   @override
   void initState() {
     super.initState();
-    focusNodeValuePurchase = FocusNode();
+    focusNodeValueCuentaFija = FocusNode();
+    focusNodeName = FocusNode();
+    focusNodeDescription = FocusNode();
   }
 
   @override
   void dispose() {
     // Clean up the focus node when the Form is disposed.
-    focusNodeValuePurchase.dispose();
+    focusNodeValueCuentaFija.dispose();
+    focusNodeName.dispose();
+    focusNodeDescription.dispose();
     super.dispose();
   }
 
@@ -58,8 +62,8 @@ class _NewPurchasePanelState extends State<NewPurchasePanel> {
               physics: NeverScrollableScrollPhysics(),
               controller: pageViewController,
               children: [
-                page1(moneyMaskControllerPurchase),
-                page2(),
+                page1(moneyMaskControllerCuentaFija),
+                page2(nameController),
                 page3(descriptionController),
                 pageSubmit(),
               ],
@@ -79,7 +83,6 @@ class _NewPurchasePanelState extends State<NewPurchasePanel> {
                               alignment: Alignment.centerRight,
                               child: FloatingActionButton(
                                 onPressed: () {
-                                  focusNodeValuePurchase.unfocus();
                                   _submitPage();
                                 },
                                 tooltip: 'Submit',
@@ -91,7 +94,6 @@ class _NewPurchasePanelState extends State<NewPurchasePanel> {
                                   alignment: Alignment.centerRight,
                                   child: FloatingActionButton(
                                     onPressed: () {
-                                      focusNodeValuePurchase.unfocus();
                                       _nextPage();
                                     },
                                     tooltip: 'Next',
@@ -122,7 +124,7 @@ class _NewPurchasePanelState extends State<NewPurchasePanel> {
 
   Future<bool> _validateIfHaveData(BuildContext context) async {
     print("Validating if have data");
-    if (moneyMaskControllerPurchase.text != "0,00") {
+    if (moneyMaskControllerCuentaFija.text != "0,00") {
       print("Have data on it");
       return Future.value(false);
     } else {
@@ -130,57 +132,26 @@ class _NewPurchasePanelState extends State<NewPurchasePanel> {
     }
   }
 
-  _onTypePurchaseSelected(bool selected, type) {
-    if (selected == true) {
-      setState(() {
-        purchase.types.add(type);
-      });
-    } else {
-      setState(() {
-        purchase.types.remove(type);
-      });
-    }
-    print(purchase.types);
-  }
-
-  _onTypePurchaseSelectedRadio(type) {
-    setState(() {
-      purchase.types = [];
-      purchase.types.add(type);
-    });
-    print(purchase.types);
-  }
-
-  listTypeOfPurchaseRadio() {
-    return ListView.builder(
-      itemCount: _typesOfPurchases.length,
-      physics: BouncingScrollPhysics(),
-      itemBuilder: (BuildContext context, int index) {
-        return RadioListTile(
-          title: Text(_typesOfPurchases[index].name),
-          value: _typesOfPurchases[index].name,
-          onChanged: (selected) {
-            _onTypePurchaseSelectedRadio(selected);
-          },
-          groupValue: purchase.types.length > 0 ? purchase.types[0] ?? 0 : 0,
-          selected: false,
-        );
+  inputName({TextEditingController controller}) {
+    return TextField(
+      focusNode: focusNodeName,
+      controller: controller,
+      textCapitalization: TextCapitalization.sentences,
+      decoration: null,
+      textInputAction: TextInputAction.go,
+      autofocus: false,
+      maxLines: null,
+      keyboardType: TextInputType.multiline,
+      style: TextStyle(color: textColor, fontFamily: 'Lato', fontSize: 20),
+      cursorColor: Colors.transparent,
+      onChanged: (value) {
+        setState(() {
+          cuentaFija.name = value;
+        });
       },
-    );
-  }
-
-  listTypeOfPurchase() {
-    return ListView.builder(
-      itemCount: _typesOfPurchases.length,
-      physics: BouncingScrollPhysics(),
-      itemBuilder: (BuildContext context, int index) {
-        return CheckboxListTile(
-          title: Text(_typesOfPurchases[index].name),
-          value: purchase.types.contains(_typesOfPurchases[index].name),
-          onChanged: (bool selected) {
-            _onTypePurchaseSelected(selected, _typesOfPurchases[index].name);
-          },
-        );
+      onSubmitted: (value) {
+        focusNodeName.unfocus();
+        _nextPage();
       },
     );
   }
@@ -188,17 +159,18 @@ class _NewPurchasePanelState extends State<NewPurchasePanel> {
   inputDescription({TextEditingController controller}) {
     return TextField(
       focusNode: focusNodeDescription,
+      textCapitalization: TextCapitalization.sentences,
       controller: controller,
       decoration: null,
       textInputAction: TextInputAction.go,
-      autofocus: true,
+      autofocus: false,
       maxLines: null,
       keyboardType: TextInputType.multiline,
       style: TextStyle(color: textColor, fontFamily: 'Lato', fontSize: 20),
       cursorColor: Colors.transparent,
       onChanged: (value) {
         setState(() {
-          purchase.description = value;
+          cuentaFija.description = value;
         });
       },
       onSubmitted: (value) {
@@ -226,7 +198,7 @@ class _NewPurchasePanelState extends State<NewPurchasePanel> {
         Expanded(
           child: Container(
             child: TextField(
-              focusNode: focusNodeValuePurchase,
+              focusNode: focusNodeValueCuentaFija,
               autofocus: true,
               controller: controller,
               decoration: null,
@@ -237,13 +209,13 @@ class _NewPurchasePanelState extends State<NewPurchasePanel> {
                 double valorDouble = double.tryParse(valor);
 
                 setState(() {
-                  purchase.value = valorDouble;
+                  cuentaFija.value = valorDouble;
                   formattedLocaleMoney = controller.text;
                 });
                 print(valor);
               },
               onSubmitted: (value) {
-                focusNodeValuePurchase.unfocus();
+                focusNodeValueCuentaFija.unfocus();
                 _nextPage();
               },
               keyboardType: TextInputType.number,
@@ -270,13 +242,46 @@ class _NewPurchasePanelState extends State<NewPurchasePanel> {
   void _nextPage() {
     int actualIndex = _selectedIndex;
     int passTo = actualIndex <= _maxPage ? actualIndex + 1 : _maxPage;
+    switch (passTo) {
+      case 0:
+        focusNodeValueCuentaFija.requestFocus();
+        break;
+      case 1:
+        focusNodeName.requestFocus();
+        break;
+      case 2:
+        focusNodeDescription.requestFocus();
+        break;
+      default:
+    }
+
+    return _onItemTapped(passTo);
+  }
+
+  void _backPage() {
+    int actualIndex = _selectedIndex;
+    int passTo = actualIndex > 0 ? actualIndex - 1 : 0;
+    switch (passTo) {
+      case 0:
+        focusNodeValueCuentaFija.requestFocus();
+        break;
+      case 1:
+        focusNodeName.requestFocus();
+        break;
+      case 2:
+        focusNodeDescription.requestFocus();
+        break;
+      default:
+    }
     return _onItemTapped(passTo);
   }
 
   void _submitPage() async {
     int passTo = 3;
+    focusNodeDescription.unfocus();
+
     _onItemTapped(passTo);
-    await new Purchase().create(purchase).then((response) {
+    await new CuentaFija().create(cuentaFija).then((response) {
       Navigator.pop(context, true);
       DialogMessages.openDialogMessage(
           context: this.context,
@@ -298,12 +303,6 @@ class _NewPurchasePanelState extends State<NewPurchasePanel> {
     });
   }
 
-  void _backPage() {
-    int actualIndex = _selectedIndex;
-    int passTo = actualIndex > 0 ? actualIndex - 1 : 0;
-    return _onItemTapped(passTo);
-  }
-
   page1(MoneyMaskedTextController moneyMaskController) {
     return Padding(
       padding: EdgeInsets.only(top: 40, left: 20, right: 20),
@@ -320,7 +319,7 @@ class _NewPurchasePanelState extends State<NewPurchasePanel> {
     );
   }
 
-  page2() {
+  page2(TextEditingController controller) {
     return Padding(
       padding: EdgeInsets.only(top: 40, left: 20, right: 20),
       child: Column(
@@ -328,29 +327,10 @@ class _NewPurchasePanelState extends State<NewPurchasePanel> {
         children: [
           h1TituloPage2,
           SizedBox(
-            height: 10,
-          ),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: RichText(
-              text: TextSpan(
-                  style: TextStyle(
-                      color: textSecondaryColor,
-                      fontSize: 18,
-                      fontFamily: 'Lato'),
-                  children: [
-                    TextSpan(text: 'Valor: R\$ '),
-                    TextSpan(
-                        text: formattedLocaleMoney.toString(),
-                        style: TextStyle(fontWeight: FontWeight.bold)),
-                  ]),
-            ),
-          ),
-          SizedBox(
-            height: 0,
+            height: 25,
           ),
           Expanded(
-            child: listTypeOfPurchaseRadio(),
+            child: inputName(controller: controller),
           )
         ],
       ),
@@ -387,20 +367,7 @@ class _NewPurchasePanelState extends State<NewPurchasePanel> {
           children: [
             TextSpan(
                 text: 'Cual ', style: TextStyle(fontWeight: FontWeight.bold)),
-            TextSpan(text: 'fue el valor?'),
-          ]),
-    ),
-  );
-
-  Widget h1TituloPage2 = Align(
-    alignment: Alignment.centerLeft,
-    child: RichText(
-      text: TextSpan(
-          style: TextStyle(color: textColor, fontSize: 25, fontFamily: 'Lato'),
-          children: [
-            TextSpan(
-                text: 'Cual ', style: TextStyle(fontWeight: FontWeight.bold)),
-            TextSpan(text: 'tipo de compra fué?'),
+            TextSpan(text: 'es el valor de la cuenta?'),
           ]),
     ),
   );
@@ -414,7 +381,20 @@ class _NewPurchasePanelState extends State<NewPurchasePanel> {
             TextSpan(
                 text: 'Escribe ',
                 style: TextStyle(fontWeight: FontWeight.bold)),
-            TextSpan(text: 'una descripción de la compra'),
+            TextSpan(text: 'el una descripcion de la cuenta fija'),
+          ]),
+    ),
+  );
+
+  Widget h1TituloPage2 = Align(
+    alignment: Alignment.centerLeft,
+    child: RichText(
+      text: TextSpan(
+          style: TextStyle(color: textColor, fontSize: 25, fontFamily: 'Lato'),
+          children: [
+            TextSpan(
+                text: 'Cual ', style: TextStyle(fontWeight: FontWeight.bold)),
+            TextSpan(text: 'el nombre de la cuenta fija'),
           ]),
     ),
   );

@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:flutter_statusbarcolor/flutter_statusbarcolor.dart';
+
 import 'package:ourapp_canada/colors.dart';
 import 'package:ourapp_canada/pages/home/dashboard-home.dart';
 import 'package:ourapp_canada/pages/splash/splash-screen.dart';
 
 Future main() async {
   await DotEnv().load('.env');
-  // changeStatusBar();
   runApp(MyApp());
 }
 
