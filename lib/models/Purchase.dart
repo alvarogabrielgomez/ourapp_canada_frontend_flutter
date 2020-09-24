@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
+import 'package:ourapp_canada/models/PurchaseResponse.dart';
 import 'package:ourapp_canada/models/RestResponse.dart';
 
 var apiEndpoint = DotEnv().env['API_ENDPOINT'];
@@ -12,43 +13,50 @@ String purchaseToJson(Purchase data) => json.encode(data.toJson());
 
 class Purchase {
   String id;
-  List<String> types;
+  String description;
   String author;
   double value;
-  String description;
-  String date;
+  List<String> types;
+  DateTime date;
+  DateTime updateDate;
 
-  Purchase(
-      {this.id,
-      this.types,
-      this.author,
-      this.value,
-      this.description,
-      this.date});
+  Purchase({
+    this.id,
+    this.description,
+    this.author,
+    this.value,
+    this.types,
+    this.date,
+    this.updateDate,
+  });
 
   factory Purchase.newObject() => Purchase(
-        id: "",
-        types: List<String>(),
-        author: "",
-        value: 0.00,
-        description: "",
-      );
+      id: "",
+      description: "",
+      author: "",
+      value: 0.00,
+      types: List<String>(),
+      date: new DateTime.now(),
+      updateDate: new DateTime.now());
 
   factory Purchase.fromJson(Map<String, dynamic> json) => Purchase(
-      id: json["id"],
-      types: List<String>.from(json["types"]?.map((x) => x) ?? []),
-      author: json["author"],
-      value: json["value"].toDouble(),
-      description: json["description"],
-      date: json["date"]);
+        id: json["id"],
+        description: json["description"],
+        author: json["author"],
+        value: json["value"].toDouble(),
+        types: List<String>.from(json["types"].map((x) => x)),
+        date: DateTime.parse(json["date"]),
+        updateDate: DateTime.parse(json["updateDate"]),
+      );
 
   Map<String, dynamic> toJson() => {
         "id": id,
-        "types": List<dynamic>.from(types.map((x) => x)),
-        "author": author,
-        "value": value.toDouble(),
         "description": description,
-        "date": date
+        "author": author,
+        "value": value,
+        "types": List<dynamic>.from(types.map((x) => x)),
+        "date": date.toIso8601String(),
+        "updateDate": updateDate.toIso8601String(),
       };
 
 //Create
@@ -71,16 +79,14 @@ class Purchase {
   }
 
 //ReadAll Current Month
-  Future<List<Purchase>> getAllCurrentMonth() async {
-    final response = await http.get("$apiEndpoint/purchasesCurrentMonth");
+  Future<PurchaseResponse> getAllCurrentMonth() async {
+    final response = await http.get("$apiEndpoint/v2/purchasesCurrentMonth");
     if (response.statusCode == 200) {
       print("fetchPurchasesCurrentMonth...");
       var responseJson = json.decode(response.body);
       var responseValues = responseJson["value"];
-      var data =
-          (responseValues as List).map((p) => Purchase.fromJson(p)).toList();
-      var test = purchaseToJson(data[0]);
-      return data;
+      var purchaseResponseObject = PurchaseResponse.fromJson(responseValues);
+      return purchaseResponseObject;
     } else {
       print("Falla al cargar fetchPurchasesCurrentMonth");
       throw Exception('Falla al cargar Purchases');

@@ -24,6 +24,9 @@ class _DashboardState extends State<Dashboard> {
   bool errorShow = false;
   String errorMessage = "";
   List<Purchase> _listOfPurchases;
+  double _valorTotalCompras;
+  double _valorTotalSupermercado;
+
   int _selectedIndex = 0;
   final pageViewController = new PageController(initialPage: 0);
   @override
@@ -104,9 +107,13 @@ class _DashboardState extends State<Dashboard> {
     });
     return new Purchase().getAllCurrentMonth().then((response) {
       setState(() {
-        _listOfPurchases = response;
+        _listOfPurchases = response.purchases;
+        _valorTotalCompras = response.valorTotalCompras;
+        _valorTotalSupermercado = response.valorTotalSupermercado;
         busyListWidget = false;
         print("Loaded loadPurchases...");
+        // print(
+        //     "Total Compras $_valorTotalCompras Total Supermercado $_valorTotalSupermercado");
       });
     }).catchError((onError) {
       print(onError);
@@ -126,7 +133,7 @@ class _DashboardState extends State<Dashboard> {
     });
     return new Purchase().getAllCurrentMonth().then((response) {
       setState(() {
-        _listOfPurchases = response;
+        _listOfPurchases = response.purchases;
         print("Loaded reloadPurchases...");
       });
     }).catchError((onError) {
@@ -290,7 +297,7 @@ class _DashboardState extends State<Dashboard> {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text(
-                "Última compra:",
+                "Mi última compra:",
                 style:
                     TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
               ),
