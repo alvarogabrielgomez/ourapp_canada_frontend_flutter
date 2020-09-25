@@ -5,20 +5,34 @@ import 'package:ourapp_canada/colors.dart';
 class BtnBasic extends StatelessWidget {
   final Function onTap;
   final String btnLabel;
+  final bool activeState;
   final Color color;
   final Widget child;
   final double width;
   final double height;
+  final double borderRadius;
   BtnBasic(
       {this.btnLabel,
       @required this.color,
       @required this.onTap,
       this.child,
+      this.activeState,
+      this.borderRadius,
       @required this.width,
       @required this.height});
   @override
   Widget build(BuildContext context) {
     var backgroundColor = color != null ? color : lightBtnBackground;
+    var borderSide = BorderSide(color: Colors.transparent);
+    var fontWeight = FontWeight.normal;
+    if (activeState != null) {
+      backgroundColor =
+          activeState ? darken(backgroundColor, 0.08) : backgroundColor;
+      borderSide =
+          BorderSide(color: activeState ? redCanadaDark : Colors.transparent);
+      fontWeight = activeState ? FontWeight.bold : FontWeight.normal;
+    }
+
     Color _splashColor = darken(backgroundColor, 0.2).withAlpha(50);
     Color _highlightColor = darken(backgroundColor, 0.2).withAlpha(75);
     return Material(
@@ -26,7 +40,10 @@ class BtnBasic extends StatelessWidget {
       elevation: 0,
       color: backgroundColor,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(7.0),
+        side: borderSide,
+        borderRadius: borderRadius == null
+            ? BorderRadius.circular(7.0)
+            : BorderRadius.circular(borderRadius),
       ),
       child: InkWell(
         splashFactory: InkRipple.splashFactory,
@@ -43,7 +60,8 @@ class BtnBasic extends StatelessWidget {
                     padding: const EdgeInsets.only(left: 8.0, right: 8),
                     child: Text(
                       btnLabel,
-                      style: TextStyle(color: Colors.white),
+                      style: TextStyle(
+                          color: Colors.white, fontWeight: fontWeight),
                     ),
                   ),
                 )

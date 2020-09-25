@@ -4,6 +4,7 @@ import 'package:ourapp_canada/colors.dart';
 import 'package:ourapp_canada/models/Purchase.dart';
 import 'package:ourapp_canada/models/TypePurchase.model.dart';
 import 'package:ourapp_canada/functions/dialogTrigger.dart';
+import 'package:ourapp_canada/sharedPreferences.dart';
 import 'package:ourapp_canada/widgets/SlidingUpPanelMessages/sliding-up-panel-messages.widget.dart';
 
 class NewPurchasePanel extends StatefulWidget {
@@ -24,6 +25,7 @@ class _NewPurchasePanelState extends State<NewPurchasePanel> {
   String formattedLocaleMoney;
   FocusNode focusNodeValuePurchase;
   FocusNode focusNodeDescription;
+  SharedPreferencesClass sharedPreferences = new SharedPreferencesClass();
   var moneyMaskControllerPurchase = new MoneyMaskedTextController(
       decimalSeparator: ',', thousandSeparator: '.');
   var descriptionController = new TextEditingController();
@@ -276,26 +278,28 @@ class _NewPurchasePanelState extends State<NewPurchasePanel> {
   void _submitPage() async {
     int passTo = 3;
     _onItemTapped(passTo);
-    await new Purchase().create(purchase).then((response) {
+    try {
+      var purchaseCreate = await new Purchase().create(purchase);
       Navigator.pop(context, true);
       DialogMessages.openDialogMessage(
           context: this.context,
-          title: response.success ? "Listo!" : "Error",
-          typeMessage:
-              response.success ? TypeMessages.SUCCESS : TypeMessages.ERROR,
-          message: response.message.toString());
-      // print(response);
+          title: purchaseCreate.success ? "Listo!" : "Error",
+          typeMessage: purchaseCreate.success
+              ? TypeMessages.SUCCESS
+              : TypeMessages.ERROR,
+          message: purchaseCreate.message.toString());
+      await sharedPreferences.setLastPurchase(purchase);
       return;
-    }).catchError((err) {
+    } catch (onError) {
       Navigator.pop(context, false);
       DialogMessages.openDialogMessage(
           context: this.context,
           title: "Error",
           typeMessage: TypeMessages.ERROR,
-          message: err.toString());
+          message: onError.toString());
       // print(response);
       return;
-    });
+    }
   }
 
   void _backPage() {
