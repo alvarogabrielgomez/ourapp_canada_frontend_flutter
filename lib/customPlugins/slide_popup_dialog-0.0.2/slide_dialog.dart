@@ -67,16 +67,20 @@ class _SlideDialogState extends State<SlideDialog> {
                   Positioned(
                     top: 15,
                     right: 10,
-                    child: FlatButton(
+                    child: Container(
                       height: 35,
-                      minWidth: 35,
-                      onPressed: () {
-                        Navigator.pop(context, false);
-                      },
-                      child: Center(
-                        child: FaIcon(
-                          FontAwesomeIcons.times,
-                          color: widget.pillColor,
+                      constraints: BoxConstraints(
+                        minWidth: 35,
+                      ),
+                      child: FlatButton(
+                        onPressed: () {
+                          Navigator.pop(context, false);
+                        },
+                        child: Center(
+                          child: FaIcon(
+                            FontAwesomeIcons.times,
+                            color: widget.pillColor,
+                          ),
                         ),
                       ),
                     ),

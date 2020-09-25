@@ -60,7 +60,7 @@ class CuentaFija {
         "value": value,
         "increment": increment.toJson(),
         "date": date.toIso8601String(),
-        "updateDate": updateDate.toIso8601String(),
+        // "updateDate": updateDate.toIso8601String(),
       };
 
 //Create

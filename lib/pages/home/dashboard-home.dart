@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:ourapp_canada/models/Purchase.dart';
 import 'package:ourapp_canada/models/PurchaseResponse.dart';
+import 'package:ourapp_canada/models/RestResponse.dart';
 import 'package:ourapp_canada/pages/PurchaseDetails/purchase-details-page.dart';
 import 'package:ourapp_canada/pages/cuentasFijas/cuentas-fijas-page.dart';
 import 'package:ourapp_canada/pages/home/components/list-tile-purchaase-dashboard.component.dart';
@@ -9,9 +10,11 @@ import 'package:ourapp_canada/pages/home/components/newPurchase.component.dart';
 import 'package:ourapp_canada/functions/dialogTrigger.dart';
 import 'package:ourapp_canada/pages/shared/Errors.widget.dart';
 import 'package:ourapp_canada/sharedPreferences.dart';
+import 'package:ourapp_canada/widgets/SlidingUpPanelMessages/sliding-up-panel-messages.widget.dart';
 import 'package:ourapp_canada/widgets/btn/btn.widget.dart';
 import 'package:ourapp_canada/widgets/pageRoutes/DashboardPageRoute.widget.dart';
 import 'package:ourapp_canada/widgets/tiles/main-tile.widget.dart';
+import 'package:skeleton_text/skeleton_text.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import '../../colors.dart';
 
@@ -39,6 +42,7 @@ class _DashboardState extends State<Dashboard> {
   @override
   void initState() {
     super.initState();
+    loadMyLastPurchase();
     loadPurchases();
   }
 
@@ -146,7 +150,6 @@ class _DashboardState extends State<Dashboard> {
   }
 
   loadPurchases() async {
-    loadMyLastPurchase();
     print("Loading loadPurchases...");
     busyLoading();
     try {
@@ -253,44 +256,91 @@ class _DashboardState extends State<Dashboard> {
   }
 
   myLastPurchaseWidget() {
-    return _myLastPurchase != null
-        ? Container(
-            child: Column(
-              mainAxisSize: MainAxisSize.max,
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text(
-                  "Mi última compra:",
-                  style: TextStyle(
-                      color: Colors.white, fontWeight: FontWeight.w600),
-                ),
-                SizedBox(height: 4),
-                Flexible(
-                  child: Text(
-                    _myLastPurchase.description,
-                    style: TextStyle(color: Colors.white, height: 1.4),
-                    textAlign: TextAlign.right,
-                    overflow: TextOverflow.ellipsis,
-                    maxLines: 2,
+    if (busyListWidget != true) {
+      return _myLastPurchase != null
+          ? Container(
+              child: Column(
+                mainAxisSize: MainAxisSize.max,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    "Mi última compra:",
+                    style: TextStyle(
+                        color: Colors.white, fontWeight: FontWeight.w600),
                   ),
-                ),
-                SizedBox(height: 5),
-                Text(
-                  "R\$ " + _myLastPurchase.value.toString(),
-                  style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16),
-                ),
-              ],
+                  SizedBox(height: 4),
+                  Flexible(
+                    child: Text(
+                      _myLastPurchase.description,
+                      style: TextStyle(color: Colors.white, height: 1.4),
+                      textAlign: TextAlign.right,
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 2,
+                    ),
+                  ),
+                  SizedBox(height: 5),
+                  Text(
+                    "R\$ " + _myLastPurchase.value.toString(),
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16),
+                  ),
+                ],
+              ),
+            )
+          : Container(
+              child: Text(
+              "Toca aquí para agregar una nueva compra",
+              textAlign: TextAlign.end,
+              style:
+                  TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+            ));
+    } else {
+      return Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(10.0),
+            child: SkeletonAnimation(
+              child: Container(
+                height: 8,
+                width: MediaQuery.of(context).size.width * 0.3,
+                color: Colors.white.withAlpha(50),
+              ),
             ),
-          )
-        : Container(
-            child: Text(
-            "Toca aquí para agregar una nueva compra",
-            textAlign: TextAlign.end,
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
-          ));
+          ),
+          SizedBox(
+            height: 9,
+          ),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(10.0),
+            child: SkeletonAnimation(
+              child: Container(
+                height: 8,
+                width: MediaQuery.of(context).size.width * 0.25,
+                color: Colors.white.withAlpha(50),
+              ),
+            ),
+          ),
+          SizedBox(
+            height: 9,
+          ),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(10.0),
+            child: SkeletonAnimation(
+              child: Container(
+                height: 8,
+                width: MediaQuery.of(context).size.width * 0.2,
+                color: Colors.white.withAlpha(50),
+              ),
+            ),
+          ),
+        ],
+      );
+    }
   }
 
   mainTileCompras() {
@@ -531,6 +581,11 @@ class _DashboardState extends State<Dashboard> {
     );
   }
 
+  Future<RestResponse> deletePurchase(Purchase purchase) async {
+    await Future.delayed(Duration(milliseconds: 500));
+    return new Purchase().delete(purchase);
+  }
+
   listPurchasesBuild(List<Purchase> list) {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 27),
@@ -542,22 +597,38 @@ class _DashboardState extends State<Dashboard> {
           return Padding(
             padding: const EdgeInsets.symmetric(vertical: 8),
             child: Dismissible(
+              key: ValueKey(list[index].id),
               confirmDismiss: (direction) async {
                 if (direction == DismissDirection.endToStart) {
                   var dismissResponse = await DialogMessages.openDialogYesOrNo(
                       context: context,
                       title: "Estas seguro?",
                       message:
-                          "Esta es una cuenta fija de cada mes, estas seguro que quieres borrarla?",
+                          "Esta es una compra registrada, estas seguro que quieres borrarla?",
                       okLabel: "Si",
                       noLabel: "No",
                       maxHeight: 315);
                   if (dismissResponse) {
-                    await deletePurchase()
+                    var deleting = await deletePurchase(list[index]);
+                    // Deleted
+                    if (deleting.success) {
+                      setState(() {
+                        list.removeAt(index);
+                        _purchaseResponse.purchases.removeAt(index);
+                      });
+                      return true;
+                    } else {
+                      DialogMessages.openDialogMessage(
+                          typeMessage: TypeMessages.ERROR,
+                          title: "Error al borrar",
+                          message: deleting.message);
+                      return false;
+                    }
+                  } else {
+                    return false;
                   }
                 }
               },
-              key: ValueKey(list[index].id),
               child: ListTilePurchase(
                 list: list,
                 index: index,

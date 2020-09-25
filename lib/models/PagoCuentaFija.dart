@@ -107,7 +107,6 @@ class PagoCuentaFija {
         print("Deleted new cuenta fija");
         var restResponse = restResponseFromJson(httppost.body);
         restResponse.statuscode = httppost.statusCode;
-        print(restResponse);
         return restResponse;
       } else {
         var restResponse = restResponseFromJson(httppost.body);

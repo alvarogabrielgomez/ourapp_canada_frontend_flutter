@@ -65,6 +65,7 @@ class _NewCuentaFijaPanelState extends State<NewCuentaFijaPanel> {
                 page1(moneyMaskControllerCuentaFija),
                 page2(nameController),
                 page3(descriptionController),
+                page4(),
                 pageSubmit(),
               ],
             ),
@@ -155,6 +156,17 @@ class _NewCuentaFijaPanelState extends State<NewCuentaFijaPanel> {
       },
     );
   }
+
+  Future<Null> selectDate(BuildContext context) async {
+    final DateTime date = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2010),
+      lastDate: null,
+    );
+  }
+
+  inputDate() {}
 
   inputDescription({TextEditingController controller}) {
     return TextField(
@@ -355,6 +367,24 @@ class _NewCuentaFijaPanelState extends State<NewCuentaFijaPanel> {
     );
   }
 
+  page4() {
+    return Padding(
+      padding: EdgeInsets.only(top: 40, left: 20, right: 20),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          h1TituloPage4,
+          SizedBox(
+            height: 25,
+          ),
+          Expanded(
+            child: inputDate(),
+          )
+        ],
+      ),
+    );
+  }
+
   pageSubmit() {
     return Center(child: CircularProgressIndicator());
   }
@@ -395,6 +425,19 @@ class _NewCuentaFijaPanelState extends State<NewCuentaFijaPanel> {
             TextSpan(
                 text: 'Cual ', style: TextStyle(fontWeight: FontWeight.bold)),
             TextSpan(text: 'el nombre de la cuenta fija'),
+          ]),
+    ),
+  );
+
+  Widget h1TituloPage4 = Align(
+    alignment: Alignment.centerLeft,
+    child: RichText(
+      text: TextSpan(
+          style: TextStyle(color: textColor, fontSize: 25, fontFamily: 'Lato'),
+          children: [
+            TextSpan(
+                text: 'Cual ', style: TextStyle(fontWeight: FontWeight.bold)),
+            TextSpan(text: 'sería la fecha de pago?'),
           ]),
     ),
   );

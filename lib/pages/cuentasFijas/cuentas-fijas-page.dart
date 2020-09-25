@@ -451,7 +451,7 @@ class _CuentasFijasWidgetState extends State<CuentasFijasWidget> {
                                     alignment: Alignment.centerRight,
                                     padding: EdgeInsets.all(27),
                                     child: Icon(
-                                      Icons.delete_outline_rounded,
+                                      Icons.delete,
                                       color: Colors.white,
                                     ),
                                   ),

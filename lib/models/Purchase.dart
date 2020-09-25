@@ -112,5 +112,23 @@ class Purchase {
 //Update
 
 //Delete
-
+  Future<RestResponse> delete(Purchase purchase) async {
+    if (purchase != null) {
+      var idPurchase = purchase.id;
+      final httppost = await http.delete('$apiEndpoint/purchases/$idPurchase',
+          headers: {HttpHeaders.contentTypeHeader: 'application/json'});
+      if (httppost.statusCode == 200) {
+        print("Deleted purchase");
+        var restResponse = restResponseFromJson(httppost.body);
+        restResponse.statuscode = httppost.statusCode;
+        return restResponse;
+      } else {
+        var restResponse = restResponseFromJson(httppost.body);
+        print(restResponse);
+        throw Exception(restResponse.message);
+      }
+    } else {
+      throw Exception('No hay compra que eliminar');
+    }
+  }
 }
