@@ -3,8 +3,8 @@ import 'dart:io';
 
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
-import 'package:ourapp_canada/models/PurchaseResponse.dart';
-import 'package:ourapp_canada/models/RestResponse.dart';
+import 'package:ourapp_canada/Purchases/models/PurchaseResponse.dart';
+import 'package:ourapp_canada/RestResponse.dart';
 
 var apiEndpoint = DotEnv().env['API_ENDPOINT'];
 

@@ -4,8 +4,8 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:ourapp_canada/models/Increment.dart';
-import 'package:ourapp_canada/models/RestResponse.dart';
+import 'package:ourapp_canada/CuentasFijas/models/Increment.dart';
+import 'package:ourapp_canada/RestResponse.dart';
 
 var apiEndpoint = DotEnv().env['API_ENDPOINT'];
 
@@ -20,6 +20,7 @@ class CuentaFija {
   String description;
   double value;
   Increment increment;
+  int dayOfPayment;
   DateTime date;
   DateTime updateDate;
   IconData icon;
@@ -29,6 +30,7 @@ class CuentaFija {
     this.description,
     this.value,
     this.increment,
+    this.dayOfPayment,
     this.date,
     this.updateDate,
     this.icon,
@@ -40,7 +42,8 @@ class CuentaFija {
         description: "",
         value: 0.00,
         increment: new Increment(sign: "", value: 0),
-        date: new DateTime(0),
+        dayOfPayment: new DateTime.now().day,
+        date: new DateTime.now(),
       );
 
   factory CuentaFija.fromJson(Map<String, dynamic> json) => CuentaFija(
@@ -49,6 +52,7 @@ class CuentaFija {
         description: json["description"],
         value: json["value"].toDouble(),
         increment: Increment.fromJson(json["increment"]),
+        dayOfPayment: json["dayOfPayment"].toInt(),
         date: DateTime.parse(json["date"]),
         updateDate: DateTime.parse(json["updateDate"]),
       );
@@ -59,6 +63,7 @@ class CuentaFija {
         "description": description,
         "value": value,
         "increment": increment.toJson(),
+        "dayOfPayment": dayOfPayment,
         "date": date.toIso8601String(),
         // "updateDate": updateDate.toIso8601String(),
       };
@@ -85,6 +90,23 @@ class CuentaFija {
 
 //Read ALL
   Future<List<CuentaFija>> getAll() async {
+    final response = await http.get("$apiEndpoint/cuentasFijas");
+    if (response.statusCode == 200) {
+      print("fetchCuentaFija...");
+      var responseJson = json.decode(response.body);
+
+      var responseValues = responseJson["value"];
+      var data =
+          (responseValues as List).map((p) => CuentaFija.fromJson(p)).toList();
+      return data;
+    } else {
+      print("Falla al cargar fetchPurchasesCurrentMonth");
+      throw Exception('Falla al cargar Purchases');
+    }
+  }
+
+// Get All Main Cuentas
+  Future<List<CuentaFija>> getAllMains() async {
     final response = await http.get("$apiEndpoint/cuentasFijas");
     if (response.statusCode == 200) {
       print("fetchCuentaFija...");
@@ -129,13 +151,29 @@ class CuentaFija {
   List<CuentaFija> getMainCuentasFijas() {
     List<CuentaFija> list = List<CuentaFija>();
     list.add(new CuentaFija(
-        id: "1", name: "Alquiler Casa", icon: FontAwesomeIcons.home));
-    list.add(
-        new CuentaFija(id: "2", name: "Luz", icon: FontAwesomeIcons.lightbulb));
-    list.add(
-        new CuentaFija(id: "3", name: "Agua", icon: FontAwesomeIcons.water));
+      id: "1",
+      name: "Alquiler Casa",
+      icon: FontAwesomeIcons.home,
+      dayOfPayment: 1,
+    ));
     list.add(new CuentaFija(
-        id: "4", name: "Internet", icon: FontAwesomeIcons.laptop));
+      id: "2",
+      name: "Luz",
+      icon: FontAwesomeIcons.lightbulb,
+      dayOfPayment: 1,
+    ));
+    list.add(new CuentaFija(
+      id: "3",
+      name: "Agua",
+      icon: FontAwesomeIcons.water,
+      dayOfPayment: 1,
+    ));
+    list.add(new CuentaFija(
+      id: "4",
+      name: "Internet",
+      icon: FontAwesomeIcons.laptop,
+      dayOfPayment: 1,
+    ));
     return list;
   }
 }

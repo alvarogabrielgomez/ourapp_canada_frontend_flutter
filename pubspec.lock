@@ -97,6 +97,13 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  flutter_date_pickers:
+    dependency: "direct main"
+    description:
+      name: flutter_date_pickers
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.1.7"
   flutter_dotenv:
     dependency: "direct main"
     description:
@@ -111,6 +118,11 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.7.5"
+  flutter_localizations:
+    dependency: "direct main"
+    description: flutter
+    source: sdk
+    version: "0.0.0"
   flutter_masked_text:
     dependency: "direct main"
     description:
@@ -170,13 +182,20 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.1.14"
+  infinite_listview:
+    dependency: "direct main"
+    description:
+      name: infinite_listview
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.0.1+1"
   intl:
     dependency: "direct main"
     description:
       name: intl
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.15.8"
+    version: "0.16.1"
   local_auth:
     dependency: "direct main"
     description:

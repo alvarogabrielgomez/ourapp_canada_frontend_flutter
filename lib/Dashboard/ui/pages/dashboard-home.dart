@@ -1,22 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:ourapp_canada/models/Purchase.dart';
-import 'package:ourapp_canada/models/PurchaseResponse.dart';
-import 'package:ourapp_canada/models/RestResponse.dart';
-import 'package:ourapp_canada/pages/PurchaseDetails/purchase-details-page.dart';
-import 'package:ourapp_canada/pages/cuentasFijas/cuentas-fijas-page.dart';
-import 'package:ourapp_canada/pages/home/components/list-tile-purchaase-dashboard.component.dart';
-import 'package:ourapp_canada/pages/home/components/newPurchase.component.dart';
-import 'package:ourapp_canada/functions/dialogTrigger.dart';
-import 'package:ourapp_canada/pages/shared/Errors.widget.dart';
+import 'package:ourapp_canada/Purchases/models/Purchase.dart';
+import 'package:ourapp_canada/Purchases/models/PurchaseResponse.dart';
+import 'package:ourapp_canada/RestResponse.dart';
+import 'package:ourapp_canada/colors.dart';
+import 'package:ourapp_canada/Purchases/ui/pages/purchase-details-page.dart';
+import 'package:ourapp_canada/CuentasFijas/ui/pages/cuentas-fijas-page.dart';
+import 'package:ourapp_canada/Dashboard/ui/widgets/list-tile-purchaase-dashboard.component.dart';
+import 'package:ourapp_canada/Purchases/ui/widgets/newPurchase.widget.dart';
+import 'package:ourapp_canada/shared/Errors.widget.dart';
 import 'package:ourapp_canada/sharedPreferences.dart';
+import 'package:ourapp_canada/widgets/SlidingUpPanelMessages/dialogTrigger.dart';
 import 'package:ourapp_canada/widgets/SlidingUpPanelMessages/sliding-up-panel-messages.widget.dart';
 import 'package:ourapp_canada/widgets/btn/btn.widget.dart';
 import 'package:ourapp_canada/widgets/pageRoutes/DashboardPageRoute.widget.dart';
 import 'package:ourapp_canada/widgets/tiles/main-tile.widget.dart';
 import 'package:skeleton_text/skeleton_text.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
-import '../../colors.dart';
 
 class Dashboard extends StatefulWidget {
   @override

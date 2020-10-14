@@ -1,4 +1,4 @@
-import 'package:ourapp_canada/models/Purchase.dart';
+import 'package:ourapp_canada/Purchases/models/Purchase.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SharedPreferencesClass {

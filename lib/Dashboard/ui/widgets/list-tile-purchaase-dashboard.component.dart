@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:ourapp_canada/models/Purchase.dart';
+import 'package:ourapp_canada/Purchases/models/Purchase.dart';
 
 class ListTilePurchase extends StatelessWidget {
   final List<Purchase> list;

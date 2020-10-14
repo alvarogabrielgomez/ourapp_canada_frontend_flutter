@@ -66,7 +66,7 @@ class _SlideDialogState extends State<SlideDialog> {
                   ),
                   Positioned(
                     top: 15,
-                    right: 10,
+                    right: 0,
                     child: Container(
                       height: 35,
                       constraints: BoxConstraints(

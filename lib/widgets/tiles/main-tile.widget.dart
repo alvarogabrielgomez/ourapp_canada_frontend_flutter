@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:ourapp_canada/widgets/tiles/raw-tile.widget.dart';
+
+import 'raw-tile.widget.dart';
 
 class MainTile extends StatefulWidget {
   final Color color;

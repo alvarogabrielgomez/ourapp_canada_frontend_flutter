@@ -5,11 +5,12 @@ import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
 import 'package:ourapp_canada/colors.dart';
-import 'package:ourapp_canada/models/CuentasFijas.dart';
-import 'package:ourapp_canada/models/Increment.dart';
-import 'package:ourapp_canada/models/PagoCuentaFija.dart';
-import 'package:ourapp_canada/pages/shared/Errors.widget.dart';
-import 'package:ourapp_canada/widgets/btn/btn.widget.dart';
+import 'package:ourapp_canada/CuentasFijas/models/CuentasFijas.dart';
+import 'package:ourapp_canada/CuentasFijas/models/Increment.dart';
+import 'package:ourapp_canada/CuentasFijas/models/PagoCuentaFija.dart';
+import 'package:ourapp_canada/CuentasFijas/ui/widgets/new-pago-cuenta-fija.widget.dart';
+import 'package:ourapp_canada/shared/Errors.widget.dart';
+import 'package:ourapp_canada/widgets/SlidingUpPanelMessages/dialogTrigger.dart';
 
 class CuentaFijaDetails extends StatefulWidget {
   final CuentaFija cuenta;
@@ -45,6 +46,8 @@ class _CuentaFijaDetailsState extends State<CuentaFijaDetails> {
 
   @override
   Widget build(BuildContext context) {
+    var dayOfPayment = widget.cuenta.dayOfPayment;
+
     return Scaffold(
       appBar: AppBar(
         brightness: Brightness.light,
@@ -54,6 +57,7 @@ class _CuentaFijaDetailsState extends State<CuentaFijaDetails> {
         iconTheme: IconThemeData(color: redCanada),
         centerTitle: true,
       ),
+      floatingActionButton: floatingNewPayment(),
       body: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -71,21 +75,10 @@ class _CuentaFijaDetailsState extends State<CuentaFijaDetails> {
                 children: [
                   Container(
                     child: Text(
-                      "Fecha de Pago: 21 de cada mes",
+                      "Fecha de Pago: $dayOfPayment de cada mes",
                       style: TextStyle(color: Colors.white),
                     ),
                   ),
-                  Container(
-                    width: 100,
-                    height: 50,
-                    child: BtnBasic(
-                      onTap: () {},
-                      btnLabel: "Pago nuevo",
-                      color: redCanadaDark,
-                      width: 100,
-                      height: 10,
-                    ),
-                  )
                 ],
               ),
             ),
@@ -118,7 +111,8 @@ class _CuentaFijaDetailsState extends State<CuentaFijaDetails> {
                     title: Text(formatterDate.format(pagos[index].date)),
                     subtitle: Text(formatterHour.format(pagos[index].date)),
                     leading: incrementItem(pagos[index].increment),
-                    trailing: Text("R\$ " + pagos[index].value.toString()),
+                    trailing:
+                        Text("R\$ " + pagos[index].value.toStringAsFixed(2)),
                   );
                 })
             : ErrorRetrieveInfo(
@@ -159,7 +153,7 @@ class _CuentaFijaDetailsState extends State<CuentaFijaDetails> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Text(
-                  "R\$ " + widget.cuenta.value.toString(),
+                  "R\$ " + widget.cuenta.value.toStringAsFixed(2),
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: Colors.white,
@@ -202,7 +196,7 @@ class _CuentaFijaDetailsState extends State<CuentaFijaDetails> {
                         : Colors.green),
               ),
               TextSpan(
-                text: "R\$ " + increment.value.toString(),
+                text: "R\$ " + increment.value.toStringAsFixed(2),
                 style: TextStyle(
                     fontWeight: FontWeight.w500,
                     color: increment.sign == 'positive'
@@ -238,7 +232,7 @@ class _CuentaFijaDetailsState extends State<CuentaFijaDetails> {
                         : Colors.green),
               ),
               TextSpan(
-                text: increment.value.toString(),
+                text: increment.value.toStringAsFixed(2),
                 style: TextStyle(
                     fontWeight: FontWeight.w500,
                     color: increment.sign == 'positive'
@@ -250,34 +244,51 @@ class _CuentaFijaDetailsState extends State<CuentaFijaDetails> {
     );
   }
 
+  floatingNewPayment() {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: FloatingActionButton.extended(
+        onPressed: () {
+          PanelOption.openPanel(
+            context: context,
+            child: NewPagoCuentaFijaPanel(cuentaFija: widget.cuenta),
+          ).then((response) {
+            print(response);
+            if (response == true) {
+              loadPagosCuentasFijas();
+            }
+          });
+        },
+        tooltip: 'Registrar nuevo pago',
+        icon: Icon(Icons.add),
+        label: Text("Nuevo Pago"),
+      ),
+    );
+  }
+
 // Methods REST
 
   loadPagosCuentasFijas() async {
+    _listOfPagosCuentasFijas = new List<PagoCuentaFija>();
+    print("Loading loadCuentasFijas...");
     setState(() {
       busyListWidget = true;
-      _listOfPagosCuentasFijas = new List<PagoCuentaFija>();
-      print("Loading loadCuentasFijas...");
     });
-
-    await Future.delayed(Duration(milliseconds: 300));
-
-    new PagoCuentaFija().getAll().then((response) {
-      var res = response;
-      // print(json.encode(res).toString());
-
+    new PagoCuentaFija()
+        .getAllWhereIDCuentaFija(widget.cuenta.id)
+        .then((response) {
+      busyListWidget = false;
+      print("Loaded loadPagosCuentasFijas...");
       setState(() {
         _listOfPagosCuentasFijas = response;
-        // print(json.encode(response).toString());
-        busyListWidget = false;
-        print("Loaded loadPagosCuentasFijas...");
       });
     }).catchError((onError) {
+      errorShow = true;
+      errorMessage = "Error loadPagosCuentasFijas";
+      print(onError);
+      print("Error loadPagosCuentasFijas...");
       setState(() {
         busyListWidget = false;
-        errorShow = true;
-        errorMessage = "Error loadPagosCuentasFijas";
-        print(onError);
-        print("Error loadPagosCuentasFijas...");
       });
     });
   }

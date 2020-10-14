@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_statusbarcolor/flutter_statusbarcolor.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:ourapp_canada/colors.dart';
-import 'package:ourapp_canada/models/Purchase.dart';
+import 'package:ourapp_canada/Purchases/models/Purchase.dart';
 
 class PurchaseDetailsPage extends StatefulWidget {
   final Purchase purchase;

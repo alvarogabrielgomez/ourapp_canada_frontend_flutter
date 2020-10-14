@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:ourapp_canada/customPlugins/slide_popup_dialog-0.0.2/slide_popup_dialog.dart'
+import 'package:ourapp_canada/widgets/customPlugins/slide_popup_dialog-0.0.2/slide_popup_dialog.dart'
     as slideDialog;
-import 'package:ourapp_canada/widgets/SlidingUpPanelMessages/sliding-up-panel-messages.widget.dart';
+
+import 'sliding-up-panel-messages.widget.dart';
 
 class DialogMessages {
   static Future<T> openDialogMessage<T>(

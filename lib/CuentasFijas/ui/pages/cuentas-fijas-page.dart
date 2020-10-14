@@ -1,15 +1,13 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:ourapp_canada/colors.dart';
-import 'package:ourapp_canada/functions/dialogTrigger.dart';
-import 'package:ourapp_canada/models/CuentasFijas.dart';
-import 'package:ourapp_canada/models/RestResponse.dart';
-import 'package:ourapp_canada/pages/cuentasFijas/components/new-cuenta-fija.component.dart';
-import 'package:ourapp_canada/pages/cuentasFijas/cuentas-fijas-details.page.dart';
-import 'package:ourapp_canada/pages/shared/Errors.widget.dart';
+import 'package:ourapp_canada/CuentasFijas/ui/widgets/new-cuenta-fija.widget.dart';
+import 'package:ourapp_canada/CuentasFijas/ui/pages/cuentas-fijas-details.page.dart';
+import 'package:ourapp_canada/CuentasFijas/models/CuentasFijas.dart';
+import 'package:ourapp_canada/RestResponse.dart';
+import 'package:ourapp_canada/shared/Errors.widget.dart';
+import 'package:ourapp_canada/widgets/SlidingUpPanelMessages/dialogTrigger.dart';
 import 'package:ourapp_canada/widgets/SlidingUpPanelMessages/sliding-up-panel-messages.widget.dart';
 import 'dart:math' as math;
 
@@ -434,7 +432,9 @@ class _CuentasFijasWidgetState extends State<CuentasFijasWidget> {
                                         vertical: 10, horizontal: 27),
                                     title: Text(title),
                                     trailing: Text("R\$ " +
-                                        cuentas[index].value.toString()),
+                                        cuentas[index]
+                                            .value
+                                            .toStringAsFixed(2)),
                                     onTap: () {
                                       Navigator.push(
                                         context,
@@ -521,12 +521,18 @@ class _CuentasFijasWidgetState extends State<CuentasFijasWidget> {
               iconTile: FaIcon(icon),
               heroTitle: Container(
                 child: Text(
-                  "R\$ 250.55",
+                  "R\$ " + mainCuentasFijas[index].value.toStringAsFixed(2),
                   style: TextStyle(fontWeight: FontWeight.normal, fontSize: 18),
                 ),
               ),
               onTap: () {
-                loadCuentasFijas();
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => CuentaFijaDetails(
+                            cuenta: mainCuentasFijas[index],
+                          )),
+                );
               },
             );
           },

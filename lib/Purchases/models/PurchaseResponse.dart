@@ -4,7 +4,7 @@
 
 import 'dart:convert';
 
-import 'package:ourapp_canada/models/Purchase.dart';
+import 'package:ourapp_canada/Purchases/models/Purchase.dart';
 
 PurchaseResponse purchaseResponseFromJson(String str) =>
     PurchaseResponse.fromJson(json.decode(str));

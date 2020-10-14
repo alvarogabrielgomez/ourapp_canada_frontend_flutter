@@ -3,8 +3,8 @@ import 'dart:io';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
-import 'package:ourapp_canada/models/Increment.dart';
-import 'package:ourapp_canada/models/RestResponse.dart';
+import 'package:ourapp_canada/CuentasFijas/models/Increment.dart';
+import 'package:ourapp_canada/RestResponse.dart';
 
 var apiEndpoint = DotEnv().env['API_ENDPOINT'];
 
@@ -33,8 +33,8 @@ class PagoCuentaFija {
         idCuentaFija: "",
         value: 0.00,
         increment: null,
-        date: new DateTime(0),
-        updateDate: new DateTime(0),
+        date: new DateTime.now(),
+        // updateDate: new DateTime.now(),
       );
 
   factory PagoCuentaFija.fromJson(Map<String, dynamic> json) => PagoCuentaFija(
@@ -50,9 +50,9 @@ class PagoCuentaFija {
         "id": id,
         "idCuentaFija": idCuentaFija,
         "value": value,
-        "increment": increment.toJson(),
+        // "increment": increment.toJson(),
         "date": date.toIso8601String(),
-        "updateDate": updateDate.toIso8601String(),
+        // "updateDate": updateDate.toIso8601String(),
       };
 
 //Create
@@ -93,7 +93,42 @@ class PagoCuentaFija {
     }
   }
 
+  //Read ALL Where IDCuentaFija
+  Future<List<PagoCuentaFija>> getAllWhereIDCuentaFija(
+      String idCuentaFija) async {
+    final response = await http
+        .get("$apiEndpoint/pagosCuentasFijas/cuentaFija/$idCuentaFija");
+    if (response.statusCode == 200) {
+      print("fetchpagosCuentasFijas where IDCuentaFija...");
+      var responseJson = json.decode(response.body);
+
+      var responseValues = responseJson["value"];
+      var data = (responseValues as List)
+          .map((p) => PagoCuentaFija.fromJson(p))
+          .toList();
+      return data;
+    } else {
+      print("Falla al cargar fetchpagosCuentasFijas where IDCuentaFija");
+      throw Exception(
+          'Falla al cargar fetchpagosCuentasFijas where IDCuentaFija');
+    }
+  }
+
 // Read ITEM
+  Future<PagoCuentaFija> getItem(String id) async {
+    final response = await http.get("$apiEndpoint/pagosCuentasFijas/$id");
+    if (response.statusCode == 200) {
+      print("fetchpagosCuentasFijas item...");
+      var responseJson = json.decode(response.body);
+
+      var responseValues = responseJson["value"];
+      var data = PagoCuentaFija.fromJson(responseValues);
+      return data;
+    } else {
+      print("Falla al cargar fetchpagosCuentasFijas item");
+      throw Exception('Falla al cargar fetchpagosCuentasFijas item');
+    }
+  }
 
 //Update
 

@@ -1,48 +1,46 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_masked_text/flutter_masked_text.dart';
 import 'package:ourapp_canada/colors.dart';
-import 'package:ourapp_canada/models/CuentasFijas.dart';
-import 'package:ourapp_canada/functions/dialogTrigger.dart';
+import 'package:ourapp_canada/Purchases/models/Purchase.dart';
+import 'package:ourapp_canada/Purchases/models/TypePurchase.model.dart';
+import 'package:ourapp_canada/sharedPreferences.dart';
+import 'package:ourapp_canada/widgets/SlidingUpPanelMessages/dialogTrigger.dart';
 import 'package:ourapp_canada/widgets/SlidingUpPanelMessages/sliding-up-panel-messages.widget.dart';
 
-class NewCuentaFijaPanel extends StatefulWidget {
+class NewPurchasePanel extends StatefulWidget {
   @override
-  _NewCuentaFijaPanelState createState() => _NewCuentaFijaPanelState();
+  _NewPurchasePanelState createState() => _NewPurchasePanelState();
 }
 
-class _NewCuentaFijaPanelState extends State<NewCuentaFijaPanel> {
+class _NewPurchasePanelState extends State<NewPurchasePanel> {
   DialogMessages dialogMessages;
 
-  CuentaFija cuentaFija = CuentaFija.newObject();
+  Purchase purchase = Purchase.newObject();
   bool busy = false;
+
+  List<TypePurchase> _typesOfPurchases = getTypesOfPurchases();
 
   int _selectedIndex = 0;
   int _maxPage = 3;
   String formattedLocaleMoney;
-  FocusNode focusNodeValueCuentaFija;
-  FocusNode focusNodeName;
+  FocusNode focusNodeValuePurchase;
   FocusNode focusNodeDescription;
-
-  var moneyMaskControllerCuentaFija = new MoneyMaskedTextController(
+  SharedPreferencesClass sharedPreferences = new SharedPreferencesClass();
+  var moneyMaskControllerPurchase = new MoneyMaskedTextController(
       decimalSeparator: ',', thousandSeparator: '.');
-  var nameController = new TextEditingController();
   var descriptionController = new TextEditingController();
   final pageViewController = new PageController(initialPage: 0);
 
   @override
   void initState() {
     super.initState();
-    focusNodeValueCuentaFija = FocusNode();
-    focusNodeName = FocusNode();
-    focusNodeDescription = FocusNode();
+    focusNodeValuePurchase = FocusNode();
   }
 
   @override
   void dispose() {
     // Clean up the focus node when the Form is disposed.
-    focusNodeValueCuentaFija.dispose();
-    focusNodeName.dispose();
-    focusNodeDescription.dispose();
+    focusNodeValuePurchase.dispose();
     super.dispose();
   }
 
@@ -62,10 +60,9 @@ class _NewCuentaFijaPanelState extends State<NewCuentaFijaPanel> {
               physics: NeverScrollableScrollPhysics(),
               controller: pageViewController,
               children: [
-                page1(moneyMaskControllerCuentaFija),
-                page2(nameController),
+                page1(moneyMaskControllerPurchase),
+                page2(),
                 page3(descriptionController),
-                page4(),
                 pageSubmit(),
               ],
             ),
@@ -84,6 +81,7 @@ class _NewCuentaFijaPanelState extends State<NewCuentaFijaPanel> {
                               alignment: Alignment.centerRight,
                               child: FloatingActionButton(
                                 onPressed: () {
+                                  focusNodeValuePurchase.unfocus();
                                   _submitPage();
                                 },
                                 tooltip: 'Submit',
@@ -95,6 +93,7 @@ class _NewCuentaFijaPanelState extends State<NewCuentaFijaPanel> {
                                   alignment: Alignment.centerRight,
                                   child: FloatingActionButton(
                                     onPressed: () {
+                                      focusNodeValuePurchase.unfocus();
                                       _nextPage();
                                     },
                                     tooltip: 'Next',
@@ -125,7 +124,7 @@ class _NewCuentaFijaPanelState extends State<NewCuentaFijaPanel> {
 
   Future<bool> _validateIfHaveData(BuildContext context) async {
     print("Validating if have data");
-    if (moneyMaskControllerCuentaFija.text != "0,00") {
+    if (moneyMaskControllerPurchase.text != "0,00") {
       print("Have data on it");
       return Future.value(false);
     } else {
@@ -133,56 +132,75 @@ class _NewCuentaFijaPanelState extends State<NewCuentaFijaPanel> {
     }
   }
 
-  inputName({TextEditingController controller}) {
-    return TextField(
-      focusNode: focusNodeName,
-      controller: controller,
-      textCapitalization: TextCapitalization.sentences,
-      decoration: null,
-      textInputAction: TextInputAction.go,
-      autofocus: false,
-      maxLines: null,
-      keyboardType: TextInputType.multiline,
-      style: TextStyle(color: textColor, fontFamily: 'Lato', fontSize: 20),
-      cursorColor: Colors.transparent,
-      onChanged: (value) {
-        setState(() {
-          cuentaFija.name = value;
-        });
-      },
-      onSubmitted: (value) {
-        focusNodeName.unfocus();
-        _nextPage();
+  _onTypePurchaseSelected(bool selected, type) {
+    if (selected == true) {
+      setState(() {
+        purchase.types.add(type);
+      });
+    } else {
+      setState(() {
+        purchase.types.remove(type);
+      });
+    }
+    print(purchase.types);
+  }
+
+  _onTypePurchaseSelectedRadio(type) {
+    setState(() {
+      purchase.types = [];
+      purchase.types.add(type);
+    });
+    print(purchase.types);
+  }
+
+  listTypeOfPurchaseRadio() {
+    return ListView.builder(
+      itemCount: _typesOfPurchases.length,
+      physics: BouncingScrollPhysics(),
+      itemBuilder: (BuildContext context, int index) {
+        return RadioListTile(
+          title: Text(_typesOfPurchases[index].name),
+          value: _typesOfPurchases[index].name,
+          onChanged: (selected) {
+            _onTypePurchaseSelectedRadio(selected);
+          },
+          groupValue: purchase.types.length > 0 ? purchase.types[0] ?? 0 : 0,
+          selected: false,
+        );
       },
     );
   }
 
-  Future<Null> selectDate(BuildContext context) async {
-    final DateTime date = await showDatePicker(
-      context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime(2010),
-      lastDate: null,
+  listTypeOfPurchase() {
+    return ListView.builder(
+      itemCount: _typesOfPurchases.length,
+      physics: BouncingScrollPhysics(),
+      itemBuilder: (BuildContext context, int index) {
+        return CheckboxListTile(
+          title: Text(_typesOfPurchases[index].name),
+          value: purchase.types.contains(_typesOfPurchases[index].name),
+          onChanged: (bool selected) {
+            _onTypePurchaseSelected(selected, _typesOfPurchases[index].name);
+          },
+        );
+      },
     );
   }
-
-  inputDate() {}
 
   inputDescription({TextEditingController controller}) {
     return TextField(
       focusNode: focusNodeDescription,
-      textCapitalization: TextCapitalization.sentences,
       controller: controller,
       decoration: null,
       textInputAction: TextInputAction.go,
-      autofocus: false,
+      autofocus: true,
       maxLines: null,
       keyboardType: TextInputType.multiline,
       style: TextStyle(color: textColor, fontFamily: 'Lato', fontSize: 20),
       cursorColor: Colors.transparent,
       onChanged: (value) {
         setState(() {
-          cuentaFija.description = value;
+          purchase.description = value;
         });
       },
       onSubmitted: (value) {
@@ -210,7 +228,7 @@ class _NewCuentaFijaPanelState extends State<NewCuentaFijaPanel> {
         Expanded(
           child: Container(
             child: TextField(
-              focusNode: focusNodeValueCuentaFija,
+              focusNode: focusNodeValuePurchase,
               autofocus: true,
               controller: controller,
               decoration: null,
@@ -221,13 +239,13 @@ class _NewCuentaFijaPanelState extends State<NewCuentaFijaPanel> {
                 double valorDouble = double.tryParse(valor);
 
                 setState(() {
-                  cuentaFija.value = valorDouble;
+                  purchase.value = valorDouble;
                   formattedLocaleMoney = controller.text;
                 });
                 print(valor);
               },
               onSubmitted: (value) {
-                focusNodeValueCuentaFija.unfocus();
+                focusNodeValuePurchase.unfocus();
                 _nextPage();
               },
               keyboardType: TextInputType.number,
@@ -254,65 +272,40 @@ class _NewCuentaFijaPanelState extends State<NewCuentaFijaPanel> {
   void _nextPage() {
     int actualIndex = _selectedIndex;
     int passTo = actualIndex <= _maxPage ? actualIndex + 1 : _maxPage;
-    switch (passTo) {
-      case 0:
-        focusNodeValueCuentaFija.requestFocus();
-        break;
-      case 1:
-        focusNodeName.requestFocus();
-        break;
-      case 2:
-        focusNodeDescription.requestFocus();
-        break;
-      default:
-    }
-
-    return _onItemTapped(passTo);
-  }
-
-  void _backPage() {
-    int actualIndex = _selectedIndex;
-    int passTo = actualIndex > 0 ? actualIndex - 1 : 0;
-    switch (passTo) {
-      case 0:
-        focusNodeValueCuentaFija.requestFocus();
-        break;
-      case 1:
-        focusNodeName.requestFocus();
-        break;
-      case 2:
-        focusNodeDescription.requestFocus();
-        break;
-      default:
-    }
     return _onItemTapped(passTo);
   }
 
   void _submitPage() async {
     int passTo = 3;
-    focusNodeDescription.unfocus();
-
     _onItemTapped(passTo);
-    await new CuentaFija().create(cuentaFija).then((response) {
+    try {
+      var purchaseCreate = await new Purchase().create(purchase);
       Navigator.pop(context, true);
       DialogMessages.openDialogMessage(
           context: this.context,
-          title: response.success ? "Listo!" : "Error",
-          typeMessage:
-              response.success ? TypeMessages.SUCCESS : TypeMessages.ERROR,
-          message: response.message.toString());
-      // print(response);
+          title: purchaseCreate.success ? "Listo!" : "Error",
+          typeMessage: purchaseCreate.success
+              ? TypeMessages.SUCCESS
+              : TypeMessages.ERROR,
+          message: purchaseCreate.message.toString());
+      await sharedPreferences.setLastPurchase(purchase);
       return;
-    }).catchError((err) {
+    } catch (onError) {
       Navigator.pop(context, false);
       DialogMessages.openDialogMessage(
           context: this.context,
           title: "Error",
           typeMessage: TypeMessages.ERROR,
-          message: err.toString());
+          message: onError.toString());
       // print(response);
       return;
-    });
+    }
+  }
+
+  void _backPage() {
+    int actualIndex = _selectedIndex;
+    int passTo = actualIndex > 0 ? actualIndex - 1 : 0;
+    return _onItemTapped(passTo);
   }
 
   page1(MoneyMaskedTextController moneyMaskController) {
@@ -331,7 +324,7 @@ class _NewCuentaFijaPanelState extends State<NewCuentaFijaPanel> {
     );
   }
 
-  page2(TextEditingController controller) {
+  page2() {
     return Padding(
       padding: EdgeInsets.only(top: 40, left: 20, right: 20),
       child: Column(
@@ -339,10 +332,29 @@ class _NewCuentaFijaPanelState extends State<NewCuentaFijaPanel> {
         children: [
           h1TituloPage2,
           SizedBox(
-            height: 25,
+            height: 10,
+          ),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: RichText(
+              text: TextSpan(
+                  style: TextStyle(
+                      color: textSecondaryColor,
+                      fontSize: 18,
+                      fontFamily: 'Lato'),
+                  children: [
+                    TextSpan(text: 'Valor: R\$ '),
+                    TextSpan(
+                        text: formattedLocaleMoney.toString(),
+                        style: TextStyle(fontWeight: FontWeight.bold)),
+                  ]),
+            ),
+          ),
+          SizedBox(
+            height: 0,
           ),
           Expanded(
-            child: inputName(controller: controller),
+            child: listTypeOfPurchaseRadio(),
           )
         ],
       ),
@@ -367,24 +379,6 @@ class _NewCuentaFijaPanelState extends State<NewCuentaFijaPanel> {
     );
   }
 
-  page4() {
-    return Padding(
-      padding: EdgeInsets.only(top: 40, left: 20, right: 20),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          h1TituloPage4,
-          SizedBox(
-            height: 25,
-          ),
-          Expanded(
-            child: inputDate(),
-          )
-        ],
-      ),
-    );
-  }
-
   pageSubmit() {
     return Center(child: CircularProgressIndicator());
   }
@@ -397,7 +391,20 @@ class _NewCuentaFijaPanelState extends State<NewCuentaFijaPanel> {
           children: [
             TextSpan(
                 text: 'Cual ', style: TextStyle(fontWeight: FontWeight.bold)),
-            TextSpan(text: 'es el valor de la cuenta?'),
+            TextSpan(text: 'fue el valor?'),
+          ]),
+    ),
+  );
+
+  Widget h1TituloPage2 = Align(
+    alignment: Alignment.centerLeft,
+    child: RichText(
+      text: TextSpan(
+          style: TextStyle(color: textColor, fontSize: 25, fontFamily: 'Lato'),
+          children: [
+            TextSpan(
+                text: 'Cual ', style: TextStyle(fontWeight: FontWeight.bold)),
+            TextSpan(text: 'tipo de compra fué?'),
           ]),
     ),
   );
@@ -411,33 +418,7 @@ class _NewCuentaFijaPanelState extends State<NewCuentaFijaPanel> {
             TextSpan(
                 text: 'Escribe ',
                 style: TextStyle(fontWeight: FontWeight.bold)),
-            TextSpan(text: 'el una descripcion de la cuenta fija'),
-          ]),
-    ),
-  );
-
-  Widget h1TituloPage2 = Align(
-    alignment: Alignment.centerLeft,
-    child: RichText(
-      text: TextSpan(
-          style: TextStyle(color: textColor, fontSize: 25, fontFamily: 'Lato'),
-          children: [
-            TextSpan(
-                text: 'Cual ', style: TextStyle(fontWeight: FontWeight.bold)),
-            TextSpan(text: 'el nombre de la cuenta fija'),
-          ]),
-    ),
-  );
-
-  Widget h1TituloPage4 = Align(
-    alignment: Alignment.centerLeft,
-    child: RichText(
-      text: TextSpan(
-          style: TextStyle(color: textColor, fontSize: 25, fontFamily: 'Lato'),
-          children: [
-            TextSpan(
-                text: 'Cual ', style: TextStyle(fontWeight: FontWeight.bold)),
-            TextSpan(text: 'sería la fecha de pago?'),
+            TextSpan(text: 'una descripción de la compra'),
           ]),
     ),
   );

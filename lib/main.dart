@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'package:ourapp_canada/colors.dart';
-import 'package:ourapp_canada/pages/home/dashboard-home.dart';
-import 'package:ourapp_canada/pages/splash/splash-screen.dart';
+import 'package:ourapp_canada/Dashboard/ui/pages/dashboard-home.dart';
+import 'package:ourapp_canada/splash-screen.dart';
 
 Future main() async {
   await DotEnv().load('.env');
+  // initializeDateFormatting().then(
+  //   (dynamic _) => runApp(MyApp()),
+  // );
   runApp(MyApp());
 }
 
@@ -20,6 +24,14 @@ class MyApp extends StatelessWidget {
     ]);
 
     return MaterialApp(
+      supportedLocales: [
+        const Locale('en', 'US'), // English
+        const Locale('pt', 'BR'), // Thai
+      ],
+      localizationsDelegates: [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+      ],
       title: 'OurApp Canada',
       theme: ThemeData(
         primarySwatch: createMaterialColor(redCanada),
