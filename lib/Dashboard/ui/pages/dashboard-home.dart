@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:ourapp_canada/ListaDeCompras/ui/pages/lista-de-compras-page.dart';
 import 'package:ourapp_canada/Purchases/models/Purchase.dart';
 import 'package:ourapp_canada/Purchases/models/PurchaseResponse.dart';
 import 'package:ourapp_canada/RestResponse.dart';
@@ -12,6 +14,7 @@ import 'package:ourapp_canada/shared/Errors.widget.dart';
 import 'package:ourapp_canada/sharedPreferences.dart';
 import 'package:ourapp_canada/widgets/SlidingUpPanelMessages/dialogTrigger.dart';
 import 'package:ourapp_canada/widgets/SlidingUpPanelMessages/sliding-up-panel-messages.widget.dart';
+import 'package:ourapp_canada/widgets/btn/btn.toolbox.widget.dart';
 import 'package:ourapp_canada/widgets/btn/btn.widget.dart';
 import 'package:ourapp_canada/widgets/pageRoutes/DashboardPageRoute.widget.dart';
 import 'package:ourapp_canada/widgets/tiles/main-tile.widget.dart';
@@ -66,6 +69,8 @@ class _DashboardState extends State<Dashboard> {
                   header(),
                   SizedBox(height: 35),
                   mainTileCompras(),
+                  SizedBox(height: 15),
+                  secundaryTiles(),
                   SizedBox(height: 20),
                   Center(
                     child: Text(
@@ -87,14 +92,7 @@ class _DashboardState extends State<Dashboard> {
                           ),
                         )
                       : !errorShow
-                          ? Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                listPurchaseControls(),
-                                gastosTotalesCounter(_purchaseResponse),
-                                listPurchases(_purchaseResponse),
-                              ],
-                            )
+                          ? _purchasesListaModulo()
                           : ErrorRetrieveInfo(
                               error: errorMessage,
                             ),
@@ -181,6 +179,17 @@ class _DashboardState extends State<Dashboard> {
     }
   }
 
+  _purchasesListaModulo() {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        listPurchaseControls(),
+        gastosTotalesCounter(_purchaseResponse),
+        listPurchases(_purchaseResponse),
+      ],
+    );
+  }
+
   backgroundDashboard() {
     return Stack(
       children: [
@@ -243,7 +252,7 @@ class _DashboardState extends State<Dashboard> {
           alignment: Alignment.center,
           width: MediaQuery.of(context).size.width,
           child: Text(
-            "Let's Fucking go to Canada",
+            "Let's go to Canada",
             style: TextStyle(
               color: Colors.white,
               fontFamily: 'Lato',
@@ -341,6 +350,39 @@ class _DashboardState extends State<Dashboard> {
         ],
       );
     }
+  }
+
+  secundaryTiles() {
+    return Container(
+      height: 105,
+      child: ListView(
+        physics: BouncingScrollPhysics(),
+        scrollDirection: Axis.horizontal,
+        children: [
+          BtnToolbox(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => ListaDeComprasPage()),
+              );
+            },
+            color: redCanadaDark.withAlpha(200),
+            icon: FaIcon(
+              FontAwesomeIcons.shoppingBasket,
+              color: Colors.white,
+            ),
+            label: Text(
+              "Lista de Compras",
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 13,
+                  fontWeight: FontWeight.normal),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   mainTileCompras() {
@@ -458,7 +500,7 @@ class _DashboardState extends State<Dashboard> {
                 ),
                 SizedBox(height: 4),
                 Text(
-                  "R\$ 250.55",
+                  "R\$ 1141.49",
                   style: TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,

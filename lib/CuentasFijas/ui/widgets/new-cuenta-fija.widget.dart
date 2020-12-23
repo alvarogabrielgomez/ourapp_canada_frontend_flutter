@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_masked_text/flutter_masked_text.dart';
+import 'package:ourapp_canada/CuentasFijas/blocs/cuentasFijas.bloc.dart';
 import 'package:ourapp_canada/colors.dart';
 import 'package:ourapp_canada/CuentasFijas/models/CuentasFijas.dart';
 import 'package:ourapp_canada/widgets/SlidingUpPanelMessages/dialogTrigger.dart';
@@ -330,7 +331,7 @@ class _NewCuentaFijaPanelState extends State<NewCuentaFijaPanel> {
     focusNodeDescription.unfocus();
 
     _onItemTapped(passTo);
-    await new CuentaFija().create(cuentaFija).then((response) {
+    await new CuentasFijasBloc().create(cuentaFija).then((response) {
       Navigator.pop(context, true);
       DialogMessages.openDialogMessage(
           context: this.context,

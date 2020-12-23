@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:ourapp_canada/CuentasFijas/blocs/cuentasFijas.bloc.dart';
 import 'package:ourapp_canada/colors.dart';
 import 'package:ourapp_canada/CuentasFijas/ui/widgets/new-cuenta-fija.widget.dart';
 import 'package:ourapp_canada/CuentasFijas/ui/pages/cuentas-fijas-details.page.dart';
@@ -13,6 +14,7 @@ import 'dart:math' as math;
 
 import 'package:ourapp_canada/widgets/btn/btn.widget.dart';
 import 'package:ourapp_canada/widgets/tiles/grid-tile.widget.dart';
+import 'package:skeleton_text/skeleton_text.dart';
 
 class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
   _SliverAppBarDelegate(
@@ -82,9 +84,12 @@ class _CuentasFijasWidgetState extends State<CuentasFijasWidget> {
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
       new GlobalKey<RefreshIndicatorState>();
 
+  double totalAccounts = 0.00;
+  bool busyTotalAccountWidget = true;
   ScrollController _scrollController;
   List<CuentaFija> _listOfCuentasFijas;
-  List<CuentaFija> _mainCuentasFijas = new CuentaFija().getMainCuentasFijas();
+  List<CuentaFija> _mainCuentasFijas =
+      new CuentasFijasBloc().getMainCuentasFijas();
 
   @override
   void initState() {
@@ -139,30 +144,7 @@ class _CuentasFijasWidgetState extends State<CuentasFijasWidget> {
                                     child: Container(
                                       child: Align(
                                         alignment: Alignment.topRight,
-                                        child: Container(
-                                          child: Column(
-                                            mainAxisSize: MainAxisSize.max,
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.end,
-                                            children: [
-                                              Text(
-                                                "Total Cuentas:",
-                                                style: TextStyle(
-                                                    color: Colors.white,
-                                                    fontWeight:
-                                                        FontWeight.w600),
-                                              ),
-                                              SizedBox(height: 4),
-                                              Text(
-                                                "R\$ 250.55",
-                                                style: TextStyle(
-                                                    color: Colors.white,
-                                                    fontWeight: FontWeight.bold,
-                                                    fontSize: 25),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
+                                        child: totalAccountsWidget(),
                                       ),
                                     ),
                                   ),
@@ -236,36 +218,114 @@ class _CuentasFijasWidgetState extends State<CuentasFijasWidget> {
 
   Future<RestResponse> deleteCuentaFija(CuentaFija cuentaDelete) async {
     await Future.delayed(Duration(milliseconds: 500));
-    return new CuentaFija().delete(cuentaDelete);
+    return new CuentasFijasBloc().delete(cuentaDelete);
+  }
+
+  totalAccountsWidget() {
+    if (busyTotalAccountWidget != true) {
+      return Container(
+        child: Column(
+          mainAxisSize: MainAxisSize.max,
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Text(
+              "Total Cuentas:",
+              style:
+                  TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+            ),
+            SizedBox(height: 4),
+            Text(
+              "R\$ " + totalAccounts.toStringAsFixed(2),
+              style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 25),
+            ),
+          ],
+        ),
+      );
+    } else {
+      return Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(10.0),
+            child: SkeletonAnimation(
+              child: Container(
+                height: 9,
+                width: MediaQuery.of(context).size.width * 0.27,
+                color: Colors.white.withAlpha(50),
+              ),
+            ),
+          ),
+          SizedBox(
+            height: 9,
+          ),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(10.0),
+            child: SkeletonAnimation(
+              child: Container(
+                height: 15,
+                width: MediaQuery.of(context).size.width * 0.30,
+                color: Colors.white.withAlpha(50),
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+  }
+
+  busyLoading() {
+    errorShow = false;
+    errorMessage = "";
+    setState(() {
+      busyListWidget = true;
+    });
+  }
+
+  doneLoading(Function setStateFunction) {
+    errorMessage = "";
+    errorShow = false;
+    setState(() {
+      busyListWidget = false;
+      setStateFunction();
+    });
+  }
+
+  errorLoading(String error) {
+    busyListWidget = false;
+    errorMessage = error;
+    setState(() {
+      errorShow = true;
+    });
   }
 
   loadCuentasFijas() async {
+    print("Loading loadCuentasFijas...");
+    busyLoading();
+    try {
+      var cuentasFijas = await new CuentasFijasBloc().getAll();
+      print("Loaded loadCuentasFijas...");
+      doneLoading(() {
+        _listOfCuentasFijas = cuentasFijas;
+      });
+      loadTotalAccountsNumber();
+    } catch (onError) {
+      errorLoading('Error loadCuentasFijas');
+      print(onError);
+      print("Error loadCuentasFijas...");
+    }
+  }
+
+  Future<void> loadTotalAccountsNumber() async {
+    var totalAccountsResponse = await new CuentasFijasBloc()
+        .getTotalValueCuentasFijas(_mainCuentasFijas, _listOfCuentasFijas);
     setState(() {
-      busyListWidget = true;
-      _listOfCuentasFijas = new List<CuentaFija>();
-      print("Loading loadCuentasFijas...");
-    });
-
-    await Future.delayed(Duration(milliseconds: 300));
-
-    new CuentaFija().getAll().then((response) {
-      var res = response;
-      // print(json.encode(res).toString());
-
-      setState(() {
-        _listOfCuentasFijas = response;
-        // print(json.encode(response).toString());
-        busyListWidget = false;
-        print("Loaded loadCuentasFijas...");
-      });
-    }).catchError((onError) {
-      setState(() {
-        busyListWidget = false;
-        errorShow = true;
-        errorMessage = "Error loadCuentasFijas";
-        print(onError);
-        print("Error loadCuentasFijas...");
-      });
+      totalAccounts = totalAccountsResponse;
+      busyTotalAccountWidget = false;
     });
   }
 
@@ -274,11 +334,12 @@ class _CuentasFijasWidgetState extends State<CuentasFijasWidget> {
       print("Loading reloadCuentasFijas..");
     });
     await Future.delayed(Duration(seconds: 1));
-    return new CuentaFija().getAll().then((response) {
+    return new CuentasFijasBloc().getAll().then((response) {
       setState(() {
         _listOfCuentasFijas = response;
         print("Loaded reloadCuentasFijas...");
       });
+      loadTotalAccountsNumber();
     }).catchError((onError) {
       setState(() {
         busyListWidget = false;
